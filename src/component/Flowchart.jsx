@@ -7,6 +7,8 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
+  useReactFlow,
+  ReactFlowProvider
 } from '@xyflow/react';
 import { applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
 import Sidebar from './Sidebar'; // Import Sidebar
@@ -23,7 +25,9 @@ const initialEdges = [
   { id: 'e1-2', source: '1', target: '2', label: 'Go to Decision' },
 ];
 
+
 export default function FlowChart() {
+    // const { project } = useReactFlow(); 
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
 
@@ -38,7 +42,7 @@ export default function FlowChart() {
   const addNode = () => {
     const newNode = {
       id: `${nodes.length + 1}`,
-      position: { x: Math.random() * 400, y: Math.random() * 400 }, // Random Position
+      position: { x: Math.random() * 200, y: Math.random() * 200 }, // Random Position
       data: { label: `Node ${nodes.length + 1}` },
     };
     setNodes((prevNodes) => [...prevNodes, newNode]);
@@ -59,7 +63,36 @@ export default function FlowChart() {
       );
     }
   };
+  
+  // 🔹 Drag & Drop: Handle Drag Over
+  const onDragOver = (event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  };
 
+  // 🔹 Drag & Drop: Handle Drop on Canvas
+  const onDrop = (event) => {
+    event.preventDefault();
+
+    const nodeType = event.dataTransfer.getData("application/reactflow");
+    if (!nodeType) return;
+
+
+    const reactFlowBounds = event.target.getBoundingClientRect();
+    const position = {
+      x: event.clientX - reactFlowBounds.left-290,
+      y: event.clientY - reactFlowBounds.top-130,
+    };
+
+    const newNode = {
+      id: `${nodes.length + 1}`,
+      position,
+      data: { label: `Node ${nodes.length + 1}` },
+      type: "default",
+    };
+
+    setNodes((prevNodes) => [...prevNodes, newNode]);
+  };
   // 🔹 Rename an Edge on Double Click
   const onEdgeDoubleClick = (event, edge) => {
     const newLabel = prompt("Enter new edge label:", edge.label);
@@ -83,8 +116,14 @@ export default function FlowChart() {
 
   return (
     <div style={{paddingLeft:"10vw", width: '80vw', height: '40vw', display: 'flex' }}>
-      <Sidebar addNode={addNode} clearCanvas={clearCanvas} /> {/* Sidebar Added */}
-      <div style={{ flex: 1, position: 'relative' }}>
+      <Sidebar addNode={addNode} clearCanvas={clearCanvas} /> 
+      {/* <div style={{ flex: 1, position: 'relative' }}>
+       */}
+       <div
+        style={{ flex: 1, position: "relative" }}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
