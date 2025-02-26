@@ -12,24 +12,46 @@ import {
 } from '@xyflow/react';
 import { applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
 import Sidebar from './Sidebar'; // Import Sidebar
-
+import { flowData } from './flowData';
 import '@xyflow/react/dist/style.css';
 
+const generateNodes = (steps) => {
+    return steps.flatMap((step) =>
+      step.nodes.map((node) => ({
+        id: node.id,
+        position: { x: Math.random() * 400, y: Math.random() * 400 }, // Random position
+        data: { label: node.label },
+        type: "default",
+      }))
+    );
+  };
+  
+  // 🔹 Convert JSON Attachments to React Flow Edges
+  const generateEdges = (steps) => {
+    return steps.flatMap((step) =>
+      step.attachments.map((attachment) => ({
+        id: `e${attachment.source}-${attachment.target}`,
+        source: attachment.source,
+        target: attachment.target,
+        label: attachment.relation,
+      }))
+    );
+  };
 // Initial Nodes and Edges
-const initialNodes = [
-  { id: '1', position: { x: 0, y: 0 }, data: { label: 'Start' } },
-  { id: '2', position: { x: 150, y: 100 }, data: { label: 'Decision' } },
-];
+// const initialNodes = [
+//   { id: '1', position: { x: 0, y: 0 }, data: { label: 'Start' } },
+//   { id: '2', position: { x: 150, y: 100 }, data: { label: 'Decision' } },
+// ];
 
-const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2', label: 'Go to Decision' },
-];
+// const initialEdges = [
+//   { id: 'e1-2', source: '1', target: '2', label: 'Go to Decision' },
+// ];
 
 
 export default function FlowChart() {
     // const { project } = useReactFlow(); 
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+    const [nodes, setNodes] = useState(generateNodes(flowData.steps)); 
+    const [edges, setEdges] = useState(generateEdges(flowData.steps));
 
   // Handle Connections
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
