@@ -49,12 +49,13 @@ const generateNodes = (steps) => {
 
 
 export default function FlowChart() {
-    // const { project } = useReactFlow(); 
+    const [flowDataState, setFlowDataState] = useState(flowData)
     const [nodes, setNodes] = useState(generateNodes(flowData.steps)); 
     const [edges, setEdges] = useState(generateEdges(flowData.steps));
 
   // Handle Connections
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+
 
   // Handle Node & Edge Changes
   const onNodesChange = useCallback((changes) => setNodes((nds) => applyNodeChanges(changes, nds)), []);
@@ -68,7 +69,19 @@ export default function FlowChart() {
       data: { label: `Node ${nodes.length + 1}` },
     };
     setNodes((prevNodes) => [...prevNodes, newNode]);
-  };
+
+    setFlowDataState((prevFlowData) => {
+        const newStep = {
+          id: `step-${prevFlowData.steps.length + 1}`,
+          name: `New Step ${prevFlowData.steps.length + 1}`,
+          nodes: [{ id: newNode.id, label: `Node ${newNode.id}`, subNodes: [] }],
+          attachments: [],
+        };
+        return { ...prevFlowData, steps: [...prevFlowData.steps, newStep] };
+      });
+
+      console.log("updated on adding new node:",flowDataState);
+    };
 
   // 🔹 Clear the Canvas
   const clearCanvas = () => {
