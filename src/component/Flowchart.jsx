@@ -196,6 +196,33 @@ export default function FlowChart() {
     event.preventDefault();
     setNodes((nds) => nds.filter((n) => n.id !== node.id));
     setEdges((eds) => eds.filter((e) => e.source !== node.id && e.target !== node.id));
+    onNodeDelete(node.id);
+  };
+  const onNodeDelete = (nodeId) => {
+    // setEdges((prevEdges) => prevEdges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+  
+    setFlowDataState((prevFlowData) => {
+      const updatedSteps = prevFlowData.steps.map((step) => {
+        const updatedNodes = step.nodes.filter((node) => node.id !== nodeId);
+  
+        // Remove nodeId from subNodes of other nodes
+        const cleanedNodes = updatedNodes.map((node) => ({
+          ...node,
+          subNodes: node.subNodes.filter((id) => id !== nodeId),
+        }));
+  
+        // Remove attachments where this node was source or target
+        const updatedAttachments = step.attachments.filter(
+          (attachment) => attachment.source !== nodeId && attachment.target !== nodeId
+        );
+  
+        return { ...step, nodes: cleanedNodes, attachments: updatedAttachments };
+      });
+  
+      return { ...prevFlowData, steps: updatedSteps };
+    });
+  
+    console.log(`Node ${nodeId} deleted via context menu. Updated flowDataState:`, flowDataState);
   };
 
   const onEdgeContextMenu = (event, edge) => {
