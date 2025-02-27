@@ -54,7 +54,62 @@ export default function FlowChart() {
     const [edges, setEdges] = useState(generateEdges(flowData.steps));
 
   // Handle Connections
-  const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+  // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+  const onConnect = (params) => {
+    const { source, target } = params;
+  
+    // Create a new edge
+    const newEdge = {
+      id: `e${source}-${target}`,
+      source,
+      target,
+      label: "New Edge",
+    };
+    setEdges((prevEdges) => [...prevEdges, newEdge]);
+  
+    // Update flowDataState
+    setFlowDataState((prevFlowData) => {
+      const updatedSteps = prevFlowData.steps.map((step) => {
+        // Check if step contains either source or target
+        const containsSource = step.nodes.some((node) => node.id === source);
+        const containsTarget = step.nodes.some((node) => node.id === target);
+  
+        if (containsSource || containsTarget) {
+          const updatedNodes = step.nodes.map((node) => {
+            if (node.id === source) {
+              // Ensure target node is added to subNodes if not already present
+              const updatedSubNodes = [...new Set([...node.subNodes, target])];
+              return { ...node, subNodes: updatedSubNodes };
+            }
+            return node;
+          });
+  
+          // Add new attachment if it doesn't exist
+          const updatedAttachments = [...step.attachments];
+          const attachmentExists = updatedAttachments.some(
+            (attachment) => (attachment.source === source && attachment.target === target) ||
+                            (attachment.source === target && attachment.target === source)
+          );
+  
+          if (!attachmentExists) {
+            updatedAttachments.push({
+              source,
+              target,
+              relation: "New Connection",
+            });
+          }
+  
+          return { ...step, nodes: updatedNodes, attachments: updatedAttachments };
+        }
+  
+        return step;
+      });
+  
+      return { ...prevFlowData, steps: updatedSteps };
+    });
+  
+    console.log("Updated flowDataState:", flowDataState);
+  };
 
 
   // Handle Node & Edge Changes
