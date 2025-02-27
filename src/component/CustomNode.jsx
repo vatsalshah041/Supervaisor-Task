@@ -4,7 +4,7 @@ import { Handle, Position } from "@xyflow/react";
 const CustomNode = ({ id, data, setNodes }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label);
-
+  
   // Update node label when editing is finished
   const handleBlur = () => {
     setIsEditing(false);

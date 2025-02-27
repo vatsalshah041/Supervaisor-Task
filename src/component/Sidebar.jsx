@@ -6,12 +6,28 @@ const Sidebar = ({ addNode, clearCanvas }) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
   };
+  const downloadJSON = () => {
+    const flowchartData = localStorage.getItem('flowchartData');
+    if (!flowchartData) {
+      alert('No data available to download!');
+      return;
+    }
+
+    const blob = new Blob([flowchartData], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'flowchart.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div style={sidebarStyles}>
       <h3>Controls</h3>
       <button onClick={addNode}>➕ Add Node</button>
       <button onClick={clearCanvas}>🗑️ Clear Canvas</button>
+      <button onClick={downloadJSON}>📥 Download JSON</button>
 
       <h3>Drag Nodes</h3>
       <div

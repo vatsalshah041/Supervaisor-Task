@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState,useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -110,8 +110,12 @@ export default function FlowChart() {
   
     console.log("Updated flowDataState:", flowDataState);
   };
-
-
+  const saveToLocalStorage = (nodes, edges) => {
+    localStorage.setItem('flowchartData', JSON.stringify({ nodes, edges }));
+  };
+  useEffect(() => {
+    saveToLocalStorage(nodes, edges);
+  }, [nodes, edges]);
   // Handle Node & Edge Changes
   const onNodesChange = useCallback((changes) => setNodes((nds) => applyNodeChanges(changes, nds)), []);
   const onEdgesChange = useCallback((changes) => setEdges((eds) => applyEdgeChanges(changes, eds)), []);
