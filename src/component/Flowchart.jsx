@@ -201,6 +201,39 @@ export default function FlowChart() {
   const onEdgeContextMenu = (event, edge) => {
     event.preventDefault();
     setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+    onEdgeDelete(edge.id, edge.source, edge.target);
+  };
+  const onEdgeDelete = (edgeId, source, target) => {
+    // Remove the edge from the edges state
+    // setEdges((prevEdges) => prevEdges.filter((edge) => edge.id !== edgeId));
+  
+    // Update flowDataState
+    setFlowDataState((prevFlowData) => {
+      const updatedSteps = prevFlowData.steps.map((step) => {
+        const updatedNodes = step.nodes.map((node) => {
+          if (node.id === source) {
+            // Remove target from subNodes
+            return { ...node, subNodes: node.subNodes.filter((id) => id !== target) };
+          } else if (node.id === target) {
+            // Remove source from subNodes
+            return { ...node, subNodes: node.subNodes.filter((id) => id !== source) };
+          }
+          return node;
+        });
+  
+        // Remove the attachment where the source and target match
+        const updatedAttachments = step.attachments.filter(
+          (attachment) => !(attachment.source === source && attachment.target === target) &&
+                          !(attachment.source === target && attachment.target === source)
+        );
+  
+        return { ...step, nodes: updatedNodes, attachments: updatedAttachments };
+      });
+  
+      return { ...prevFlowData, steps: updatedSteps };
+    });
+  
+    console.log("Updated flowDataState after edge deletion:", flowDataState);
   };
 
 
